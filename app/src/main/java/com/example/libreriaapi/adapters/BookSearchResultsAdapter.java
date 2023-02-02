@@ -46,15 +46,10 @@ public class BookSearchResultsAdapter extends RecyclerView.Adapter<BookSearchRes
                     .into(holder.smallThumbnailImageView);
         }
         if (volume.getVolumeInfo().getAuthors() != null) {
-//            Util u = new Util();
-//            String authors = u.StringJoin(volume.getVolumeInfo().getAuthors(), ", ");
-//            String authors = u.concat(volume.getVolumeInfo().getAuthors(), ", ");
-
             String authors = "";
             for(String a: volume.getVolumeInfo().getAuthors()){
                 authors += a+", ";
             }
-
             holder.authorsTextView.setText(authors);
         }
     }
@@ -65,10 +60,13 @@ public class BookSearchResultsAdapter extends RecyclerView.Adapter<BookSearchRes
     }
 
     public void setResults(List<Volume> results) {
-        this.volumes = results;
+        this.volumes.addAll(results);
         notifyDataSetChanged();
     }
 
+    public void removeAll(){
+        this.volumes.removeAll(volumes);
+    }
 
     public class BookSearchResultHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView titleTextView;
@@ -84,7 +82,6 @@ public class BookSearchResultsAdapter extends RecyclerView.Adapter<BookSearchRes
             smallThumbnailImageView = itemView.findViewById(R.id.book_item_smallThumbnail);
             itemView.setOnClickListener(this);
         }
-
 
         @Override
         public void onClick(View v) {

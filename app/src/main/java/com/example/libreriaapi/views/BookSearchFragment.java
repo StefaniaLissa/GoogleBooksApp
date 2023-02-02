@@ -5,9 +5,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -20,20 +23,26 @@ import com.example.libreriaapi.models.Volume;
 import com.example.libreriaapi.viewmodels.BookSearchViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 
+import org.json.JSONException;
+
 import java.io.Serializable;
 
 public class BookSearchFragment extends Fragment{
+    private static final int ITEMS_PER_PAGE = 10;
     private BookSearchViewModel viewModel;
     private BookSearchResultsAdapter adapter;
     private TextInputEditText keywordEditText, authorEditText;
     private Button searchButton;
+    private int index;
+    private String author = "", keyword = "";
+    private ProgressBar loadingPB;
+    private NestedScrollView nestedSV;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        index = 0;
         adapter = new BookSearchResultsAdapter();
-
         viewModel = new ViewModelProvider(getActivity()).get(BookSearchViewModel.class);
         viewModel.init();
         viewModel.getVolumesResponseLiveData().observe(this, volumesResponse -> {
@@ -51,24 +60,42 @@ public class BookSearchFragment extends Fragment{
 
         RecyclerView recyclerView = view.findViewById(R.id.fragment_booksearch_searchResultsRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(adapter);
 
+        recyclerView.setAdapter(adapter);
+        nestedSV = view.findViewById(R.id.idNestedSV);
+        loadingPB = view.findViewById(R.id.idPBLoading);
+        loadingPB.setVisibility(View.INVISIBLE);
+        nestedSV.setOnScrollChangeListener(scrollChangeListener);
         keywordEditText = view.findViewById(R.id.fragment_booksearch_keyword);
         authorEditText = view.findViewById(R.id.fragment_booksearch_author);
         searchButton = view.findViewById(R.id.fragment_booksearch_search);
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        searchButton.setOnClickListener(v -> {
+                loadingPB.setVisibility(View.VISIBLE);
                 performSearch();
-            }
         });
+
         return view;
     }
 
     public void performSearch() {
-        String keyword = keywordEditText.getEditableText().toString();
-        String author = authorEditText.getEditableText().toString();
-        viewModel.searchVolumes(keyword, author);
+        if(!(author.equals(authorEditText.getEditableText().toString()) &&
+                keyword.equals(keywordEditText.getEditableText().toString()))){
+            adapter.removeAll();
+        }
+        author = authorEditText.getEditableText().toString();
+        keyword = keywordEditText.getEditableText().toString();
+        viewModel.searchVolumes(keyword, author, index);
     }
+
+    private NestedScrollView.OnScrollChangeListener scrollChangeListener = new NestedScrollView.OnScrollChangeListener() {
+        @Override
+        public void onScrollChange(@NonNull NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+            if (scrollY == v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight()) {
+                loadingPB.setVisibility(View.VISIBLE);
+                index = index+ITEMS_PER_PAGE;
+                performSearch();
+            }
+        }
+    };
 
 }

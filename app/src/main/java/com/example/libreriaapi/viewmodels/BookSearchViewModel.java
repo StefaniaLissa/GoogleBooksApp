@@ -29,10 +29,10 @@ public class BookSearchViewModel extends AndroidViewModel {
     }
 
 //  and a searchVolumes method, which is used to search for books with a specific keyword and/or author.
-    public void searchVolumes(String keyword, String author) {
+    public void searchVolumes(String keyword, String author, int index) {
 //        Dotenv dotenv = Dotenv.configure().directory("/assets").filename("env").load();
 //        bookRepository.searchVolumes(keyword, author, dotenv.get("GOOGLE_API_KEY"));
-        bookRepository.searchVolumes(keyword, author);
+        bookRepository.searchVolumes(keyword, author, index);
     }
 
 //        The ViewModel also has a getVolumesResponseLiveData method,
@@ -41,4 +41,5 @@ public class BookSearchViewModel extends AndroidViewModel {
     public LiveData<VolumesResponse> getVolumesResponseLiveData() {
         return volumesResponseLiveData;
     }
+
 }

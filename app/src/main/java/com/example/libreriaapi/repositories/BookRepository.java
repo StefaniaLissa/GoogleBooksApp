@@ -42,9 +42,8 @@ public class BookRepository {
                 .create(BookDetailsService.class);
     }
 
-
-    public void searchVolumes(String keyword, String author) {
-        bookSearchService.searchVolumes(keyword, author)
+    public void searchVolumes(String keyword, String author, int index) {
+        bookSearchService.searchVolumes(keyword, author, index)
                 .enqueue(new Callback<VolumesResponse>() {
                     @Override
                     public void onResponse(Call<VolumesResponse> call, Response<VolumesResponse> response) {
